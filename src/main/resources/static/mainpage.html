@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tires Explorer App by Serj Rubtcov</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700&display=swap">
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-block {
+            margin-bottom: 20px;
+        }
+
+        .filters-fields { display: flex; gap: 10px;}
+
+        .filters-fields input {
+            flex: 1;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .filter-select {
+            display: flex;
+            gap: 10px;
+            align-items: baseline;
+        }
+
+        .filter-select select {
+            flex: 1;
+        }
+
+        .filter-block label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .filter-block select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .filter-block input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        .fetch-button {
+            background-color: #4CAF50;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .checkbox {
+            display: flex;
+            gap: 10px;
+            align-items: baseline;
+        }
+
+        .fetch-button:hover {
+            background-color: #3e8e41;
+        }
+
+        .result-block {
+            margin-top: 20px;
+        }
+
+        .result-block table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .result-block th, .result-block td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .result-block th {
+            background-color: #f0f0f0;
+        }
+
+        .dark-mode-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #333;
+            color: #fff;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .dark-mode-button:hover {
+            background-color: #444;
+        }
+
+        .dark-mode .container {
+            background-color: #444;
+            border-color: #333;
+        }
+
+        .dark-mode .fetch-button {
+            background-color: #666;
+        }
+
+        .dark-mode .result-block th {
+            background-color: #444;
+        }
+    </style>
+</head>
+
+<body>
+<button class="dark-mode-button" id="themeToggle" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+<div class="container">
+    <h1 align="center">Tires Explorer App</h1>
+    <div class="filter-block">
+        <div class="filters-fields">
+            <input type="number" id="width" placeholder="Ширина" min="0">
+            <input type="number" id="height" placeholder="Высота" min="0">
+            <input type="number" id="diameter" placeholder="Диаметр" min="0">
+        </div>
+        <div class="filter-select">
+            <label for="season">Сезон:</label>
+            <select id="season">
+                <option value=""> -</option>
+                <option value="Всесезонная">Всесезонная</option>
+                <option value="Зимняя">Зимняя</option>
+                <option value="Летняя">Летняя</option>
+            </select>
+            <label for="spikes">Шип:</label>
+            <select id="spikes">
+                <option value=""> -</option>
+                <option value="Шип.">Шип.</option>
+                <option value="Нешип.">Нешип.</option>
+            </select>
+        </div>
+
+        <div class="checkbox">
+            <label for="runflat">RunFlat</label><input type="checkbox" id="runflat">
+            <label for="lightweight">Легкогрузовые</label><input type="checkbox" id="lightweight">
+            <label for="mt">M/T</label><input type="checkbox" id="mt">
+            <label for="at">A/T</label><input type="checkbox" id="at">
+        </div>
+
+    </div>
+    <button class="fetch-button" id="searchButton">Найти</button>
+
+    <div class="result-block" id="response">
+        <label for="response">Результат</label>
+    </div>
+
+</div>
+</body>
+</html>
+<script>
+    document.getElementById('searchButton').addEventListener('click', function () {
+        const width = document.getElementById('width').value;
+        const height = document.getElementById('height').value;
+        const diameter = document.getElementById('diameter').value;
+        const season = document.getElementById('season').value;
+        const spikes = document.getElementById('spikes').value;
+        const runflat = document.getElementById('runflat').checked;
+        const lightweight = document.getElementById('lightweight').checked;
+        const mt = document.getElementById('mt').checked;
+        const at = document.getElementById('at').checked;
+
+        const filters = {
+            width,
+            height,
+            diameter,
+            season,
+            spikes,
+            runflat,
+            lightweight,
+            mt,
+            at
+        };
+
+        fetch('http://localhost:8081/fetchData', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(filters)
+        })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('response').innerText = data;
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+            });
+    });
+
+    document.getElementById('themeToggle').addEventListener('click', function () {
+        document.body.classList.toggle('dark-mode');
+    });
+</script>
+
