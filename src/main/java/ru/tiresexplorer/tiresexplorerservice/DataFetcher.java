@@ -114,7 +114,7 @@ public class DataFetcher {
         }
     }
 
-    private String performData(Filter filter) {
+    String performData(Filter filter) {
         Cash cash = Cash.getInstance();
 
         List<Assortment> assortments = new ArrayList<>(cash.getAssortment());
