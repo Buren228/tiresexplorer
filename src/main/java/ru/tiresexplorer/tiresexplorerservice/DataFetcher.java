@@ -196,12 +196,12 @@ public class DataFetcher {
     private int round25(String number) {
         int remainder = Integer.parseInt(number) % 25;
 
-        if (remainder < 13) {
-            return Integer.parseInt(number) - remainder;
-        } else {
+        if (remainder != 0) {
             return Integer.parseInt(number) + (25 - remainder);
         }
-
+        else {
+            return Integer.parseInt(number);
+        }
     }
 
     private static List<Availability> eliminateDuplicates(List<Availability> availabilityList) {
