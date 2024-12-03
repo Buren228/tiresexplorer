@@ -34,13 +34,12 @@ public class DataFetcher {
     @Value("${api.uuid}")
     private String uuid;
 
-    String fetchData() {
+    public void fetchData() {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request;
         Cash cash = Cash.getInstance();
-        LocalDateTime now = LocalDateTime.now();
+        //LocalDateTime now = LocalDateTime.now();
 
-        if (cash.getLastUpdated() == null || ChronoUnit.MINUTES.between(cash.getLastUpdated(), now) >= 30) {
             try {
                 // Fetch assortment data
                 request = HttpRequest.newBuilder()
@@ -50,7 +49,7 @@ public class DataFetcher {
                 HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
                 cash.setAssortment(performAssortment(response.body()));
             } catch (IOException | InterruptedException e) {
-                return "Произошла ошибка при выгрузке ассортимента \n" + e.getMessage();
+                System.out.println("Произошла ошибка при выгрузке ассортимента \n" + e.getMessage());
             }
             try {
                 request = HttpRequest.newBuilder()
@@ -62,7 +61,7 @@ public class DataFetcher {
                 cash.setAvailability(performAvailability(response.body()));
 
             } catch (IOException | InterruptedException e) {
-                return "Произошла ошибка при выгрузке остатков \n" + e.getMessage();
+                System.out.println("Произошла ошибка при выгрузке остатков \n" + e.getMessage());
             }
 
 //        try {
@@ -78,13 +77,7 @@ public class DataFetcher {
 //            System.out.println(e.getMessage() + " Stocks");
 //        }
             if (cash.getAvailability() == null || cash.getAssortment() == null)
-                return "Ничего не выгрузилось, что-то пошло не так";
-
-            cash.setLastUpdated(now);
-            return "";
-        } else {
-            return "";
-        }
+                System.out.println("Ничего не выгрузилось, что-то пошло не так");
 
     }
 

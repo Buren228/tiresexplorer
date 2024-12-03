@@ -24,12 +24,6 @@ public class TiresExplorerController {
 
     @PostMapping("/fetchData")
     public String fetchData(@RequestBody Filter filter) {
-        String responseResult = dataFetcher.fetchData();
-        if (responseResult.equals("")) {
-            return  dataFetcher.performData(filter);
-        }
-        else {
-            return responseResult;
-        }
+        return  dataFetcher.performData(filter);
     }
 }
