@@ -25,13 +25,15 @@
             margin-bottom: 20px;
         }
 
-        .filters-fields { display: flex; gap: 10px;}
+        .filters-fields { display: flex; gap: 10px; flex-wrap: wrap;}
 
         .filters-fields input {
             flex: 1;
             padding: 10px;
             margin-bottom: 10px;
             border: 1px solid #ccc;
+            align-items: baseline;
+            min-width: 120px;
         }
 
         .filter-select {
@@ -73,6 +75,7 @@
             display: flex;
             gap: 10px;
             align-items: baseline;
+            flex-wrap: wrap;
         }
 
         .fetch-button:hover {
