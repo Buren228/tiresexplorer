@@ -17,8 +17,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -38,7 +36,6 @@ public class DataFetcher {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request;
         Cash cash = Cash.getInstance();
-        //LocalDateTime now = LocalDateTime.now();
 
             try {
                 // Fetch assortment data
