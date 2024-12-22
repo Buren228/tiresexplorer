@@ -101,39 +101,72 @@
             background-color: #f0f0f0;
         }
 
-        .dark-mode-button {
+        /*.dark-mode-button {*/
+        /*    position: absolute;*/
+        /*    top: 10px;*/
+        /*    right: 10px;*/
+        /*    background-color: #333;*/
+        /*    color: #fff;*/
+        /*    padding: 5px 10px;*/
+        /*    border: none;*/
+        /*    border-radius: 5px;*/
+        /*    cursor: pointer;*/
+        /*}*/
+
+        /*.dark-mode-button:hover {*/
+        /*    background-color: #444;*/
+        /*}*/
+
+        /*.dark-mode .container {*/
+        /*    background-color: #444;*/
+        /*    border-color: #333;*/
+        /*}*/
+
+        /*.dark-mode .fetch-button {*/
+        /*    background-color: #666;*/
+        /*}*/
+
+        /*.dark-mode .result-block th {*/
+        /*    background-color: #444;*/
+        /*}*/
+
+        .autocomplete-brands {
+            border: 1px solid #ccc;
+            max-height: 200px;
+            overflow-y: auto;
             position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: #333;
-            color: #fff;
-            padding: 5px 10px;
-            border: none;
-            border-radius: 5px;
+            width: 300px;
+            background-color: white;
+            z-index: 10;
+            display: flex;
+            gap: 10px;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-top: 5px; /* Немного отступим вниз, чтобы предложения не накладывались на поле ввода */
+        }
+
+        .autocomplete-brand {
+            padding: 8px;
             cursor: pointer;
         }
 
-        .dark-mode-button:hover {
-            background-color: #444;
+        .autocomplete-brand:hover {
+            background-color: #f0f0f0;
         }
 
-        .dark-mode .container {
-            background-color: #444;
-            border-color: #333;
-        }
-
-        .dark-mode .fetch-button {
-            background-color: #666;
-        }
-
-        .dark-mode .result-block th {
-            background-color: #444;
+        #brands {
+            position: relative;
+            display: flex;
+            gap: 10px;
+            align-items: baseline;
+            flex-wrap: wrap;
+            z-index: 100;
         }
     </style>
 </head>
 
 <body>
-<button class="dark-mode-button" id="themeToggle" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+<!--<button class="dark-mode-button" id="themeToggle" onclick="toggleDarkMode()">Toggle Dark Mode</button>-->
 <div class="container">
     <h1 align="center">Tires Explorer App</h1>
     <div class="filter-block">
@@ -157,6 +190,10 @@
                 <option value="Нешип.">Нешип.</option>
             </select>
         </div>
+
+            <label for="brands">Бренд</label>
+            <input type="text" id="brands" placeholder="Введите бренд..." autocomplete="on">
+            <div id="brandsContainer" class="autocomplete-brands"></div>
 
         <div class="checkbox">
             <label for="runflat">RunFlat</label><input type="checkbox" id="runflat">
@@ -186,6 +223,7 @@
         const lightweight = document.getElementById('lightweight').checked;
         const mt = document.getElementById('mt').checked;
         const at = document.getElementById('at').checked;
+        const brand = document.getElementById('brands').value;
 
         const filters = {
             width,
@@ -196,10 +234,11 @@
             runflat,
             lightweight,
             mt,
-            at
+            at,
+            brand
         };
 
-        fetch('http://localhost:8081/fetchData', {
+        fetch('/fetchData', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -215,8 +254,55 @@
             });
     });
 
-    document.getElementById('themeToggle').addEventListener('click', function () {
-        document.body.classList.toggle('dark-mode');
+    document.getElementById('brands').addEventListener('input', function() {
+        let query = this.value.trim();
+
+        if (query.length > 0) {
+            // Отправляем запрос на сервер для получения предложений
+            fetch('/getBrands')
+                .then(response => response.json())
+                .then(brands => {
+                    // Фильтруем предложения по введенному запросу
+                    let filteredBrands = brands.filter(s => s.toLowerCase().startsWith(query.toLowerCase()));
+
+                    // Ограничиваем количество вариантов до 5
+                    filteredBrands = filteredBrands.slice(0, 5);
+
+                    // Отображаем предложения
+                    displayBrands(filteredBrands);
+                });
+        } else {
+            // Если поле пустое, скрываем предложения
+            document.getElementById('brandsContainer').innerHTML = '';
+        }
     });
+
+    function displayBrands(brands) {
+        const container = document.getElementById('brandsContainer');
+        container.innerHTML = ''; // Очищаем предыдущие предложения
+
+        if (brands.length > 0) {
+            // Создаем список предложений
+            brands.forEach(brands => {
+                const div = document.createElement('div');
+                div.classList.add('autocomplete-brand');
+                div.textContent = brands;
+                // Добавляем обработчик клика для каждого предложения
+                div.addEventListener('click', function() {
+                    // Заполняем поле ввода выбранным предложением
+                    document.getElementById('brands').value = brands;
+
+                    // Закрываем список предложений
+                    container.innerHTML = '';
+                });
+                container.appendChild(div);
+            });
+        } else {
+            const div = document.createElement('div');
+            div.classList.add('autocomplete-brand');
+            div.textContent = 'Нет результатов';
+            container.appendChild(div);
+        }
+    }
 </script>
 

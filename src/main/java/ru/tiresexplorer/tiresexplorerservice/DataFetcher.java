@@ -2,16 +2,18 @@ package ru.tiresexplorer.tiresexplorerservice;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import ru.tiresexplorer.tiresexplorerservice.data.Assortment;
 import ru.tiresexplorer.tiresexplorerservice.data.AssortmentData;
 import ru.tiresexplorer.tiresexplorerservice.data.Availability;
 import ru.tiresexplorer.tiresexplorerservice.data.AvailabilityData;
 import ru.tiresexplorer.tiresexplorerservice.data.Filter;
 import ru.tiresexplorer.tiresexplorerservice.singleton.Cash;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
-
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -20,8 +22,10 @@ import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Component
 public class DataFetcher {
@@ -37,29 +41,29 @@ public class DataFetcher {
         HttpRequest request;
         Cash cash = Cash.getInstance();
 
-            try {
-                // Fetch assortment data
-                request = HttpRequest.newBuilder()
-                        .uri(URI.create(ASSORTMENT_URL + "?uuid=" + uuid))
-                        .GET()
-                        .build();
-                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-                cash.setAssortment(performAssortment(response.body()));
-            } catch (IOException | InterruptedException e) {
-                System.out.println("Произошла ошибка при выгрузке ассортимента \n" + e.getMessage());
-            }
-            try {
-                request = HttpRequest.newBuilder()
-                        // Fetch availability data
-                        .uri(URI.create(AVAILABILITY_URL + "?uuid=" + uuid))
-                        .GET()
-                        .build();
-                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-                cash.setAvailability(performAvailability(response.body()));
+        try {
+            // Fetch assortment data
+            request = HttpRequest.newBuilder()
+                    .uri(URI.create(ASSORTMENT_URL + "?uuid=" + uuid))
+                    .GET()
+                    .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            cash.setAssortment(performAssortment(response.body()));
+        } catch (IOException | InterruptedException e) {
+            System.out.println("Произошла ошибка при выгрузке ассортимента \n" + e.getMessage());
+        }
+        try {
+            request = HttpRequest.newBuilder()
+                    // Fetch availability data
+                    .uri(URI.create(AVAILABILITY_URL + "?uuid=" + uuid))
+                    .GET()
+                    .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            cash.setAvailability(performAvailability(response.body()));
 
-            } catch (IOException | InterruptedException e) {
-                System.out.println("Произошла ошибка при выгрузке остатков \n" + e.getMessage());
-            }
+        } catch (IOException | InterruptedException e) {
+            System.out.println("Произошла ошибка при выгрузке остатков \n" + e.getMessage());
+        }
 
 //        try {
 //            // Fetch stocks data
@@ -73,8 +77,35 @@ public class DataFetcher {
 //        } catch (IOException | InterruptedException e) {
 //            System.out.println(e.getMessage() + " Stocks");
 //        }
-            if (cash.getAvailability() == null || cash.getAssortment() == null)
-                System.out.println("Ничего не выгрузилось, что-то пошло не так");
+        if (cash.getAvailability() == null || cash.getAssortment() == null) {
+            System.out.println("Ничего не выгрузилось, что-то пошло не так");
+        }
+
+        updateBrands();
+    }
+
+    private void updateBrands() {
+        Cash cash = Cash.getInstance();
+
+        try {
+            File brands = new File("src/main/resources/static/brands.txt");
+
+            Set<String> uniqueBrands = new HashSet<>();
+
+            for (Assortment assortment : cash.getAssortment()) {
+                uniqueBrands.add(assortment.getP_brand());
+            }
+
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(brands, false))) {
+                for (String brand : uniqueBrands) {
+                    writer.write(brand);
+                    writer.newLine();
+                }
+            }
+
+        } catch (IOException e) {
+            System.out.println("Файл с брендами не найден или его не существует");
+        }
 
     }
 
@@ -125,6 +156,9 @@ public class DataFetcher {
         }
         if (!filter.getSeason().equals("")) {
             assortments.removeIf(x -> !x.getP_season().equals(filter.getSeason()));
+        }
+        if (!filter.getBrand().equals("")) {
+            assortments.removeIf(x -> !x.getP_brand().equals(filter.getBrand()));
         }
 
         switch (filter.getSpikes()) {
@@ -188,8 +222,7 @@ public class DataFetcher {
 
         if (remainder != 0) {
             return Integer.parseInt(number) + (25 - remainder);
-        }
-        else {
+        } else {
             return Integer.parseInt(number);
         }
     }

@@ -9,7 +9,7 @@ public
 class Assortment {
     private String code;
     private String p_full_name;
-//    private String p_brand;
+    private String p_brand;
 //    private String p_model;
     private String p_width;
     private String p_height;
