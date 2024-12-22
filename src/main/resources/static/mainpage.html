@@ -260,7 +260,12 @@
         if (query.length > 0) {
             // Отправляем запрос на сервер для получения предложений
             fetch('/getBrands')
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(brands => {
                     // Фильтруем предложения по введенному запросу
                     let filteredBrands = brands.filter(s => s.toLowerCase().startsWith(query.toLowerCase()));
@@ -270,6 +275,9 @@
 
                     // Отображаем предложения
                     displayBrands(filteredBrands);
+                })
+                .catch(error => {
+                    console.error("Error fetching brands:", error);
                 });
         } else {
             // Если поле пустое, скрываем предложения
