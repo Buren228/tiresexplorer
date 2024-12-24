@@ -36,7 +36,7 @@ public class TiresExplorerController {
 
     @GetMapping("/getBrands")
     public List<String> getSearchSuggestions() throws IOException {
-        File file = new File("src/main/resources/static/brands.txt");
+        File file = new File("brands.txt");
 
         List<String> brands = new ArrayList<>();
 

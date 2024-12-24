@@ -88,7 +88,7 @@ public class DataFetcher {
         Cash cash = Cash.getInstance();
 
         try {
-            File brands = new File("src/main/resources/static/brands.txt");
+            File brands = new File("brands.txt");
 
             Set<String> uniqueBrands = new HashSet<>();
 
@@ -169,52 +169,55 @@ public class DataFetcher {
                 assortments.removeIf(Assortment::getP_thorn);
                 break;
         }
-        if (assortments.size() > 0) {
-            List<Availability> availabilities = new ArrayList<>();
+        if (assortments.size() < 1) {
+            return "Ничего не найдено по заданным параметрам";
+        }
+        List<Availability> availabilities = new ArrayList<>();
 
-            for (Assortment assortment : assortments) {
-                cash.getAvailability().forEach(x -> {
-                    if (x.getCode().equals(assortment.getCode())) {
-                        availabilities.add(x);
-                    }
-                });
-            }
-
-            //availabilities.removeIf(x -> x.getQuantity() < 4);
-
-            availabilities.forEach(x -> x.setPrice(round25(x.getPrice()) + ""));
-
-            StringBuilder result = new StringBuilder();
-
-            List<Availability> uniqueList = eliminateDuplicates(availabilities);
-
-            uniqueList.sort(Comparator.comparing(x -> Integer.parseInt(x.getPrice())));
-
-            for (Availability availability : uniqueList) {
-
-                assortments.forEach(x -> {
-                    if (x.getCode().equals(availability.getCode())) {
-                        result.append(x.getP_full_name()).append(" - ");
-                        if (availability.getPrice().split(",").length > 1) {
-                            for (int i = 0; i < availability.getPrice().split(",").length; i++) {
-                                String[] prices = availability.getPrice().split(",");
-                                result.append(prices[i]).append(" ₽/шт. ");
-                                if (i + 1 < prices.length) {
-                                    result.append(" ;");
-                                }
-
-                            }
-                        } else {
-                            result.append(availability.getPrice()).append(" ₽/шт. ");
-                        }
-                    }
-                });
-                result.append("\n");
-            }
-            return result.toString();
+        for (Assortment assortment : assortments) {
+            cash.getAvailability().forEach(x -> {
+                if (x.getCode().equals(assortment.getCode())) {
+                    availabilities.add(x);
+                }
+            });
         }
 
-        return "Ничего не найдено по заданным параметрам";
+        //availabilities.removeIf(x -> x.getQuantity() < 4);
+
+        if (availabilities.size() < 1) {
+            return "Ничего не найдено по заданным параметрам";
+        }
+
+        availabilities.forEach(x -> x.setPrice(round25(x.getPrice()) + ""));
+
+        StringBuilder result = new StringBuilder();
+
+        List<Availability> uniqueList = eliminateDuplicates(availabilities);
+
+        uniqueList.sort(Comparator.comparing(x -> Integer.parseInt(x.getPrice())));
+
+        for (Availability availability : uniqueList) {
+
+            assortments.forEach(x -> {
+                if (x.getCode().equals(availability.getCode())) {
+                    result.append(x.getP_full_name()).append(" - ");
+                    if (availability.getPrice().split(",").length > 1) {
+                        for (int i = 0; i < availability.getPrice().split(",").length; i++) {
+                            String[] prices = availability.getPrice().split(",");
+                            result.append(prices[i]).append(" ₽/шт. ");
+                            if (i + 1 < prices.length) {
+                                result.append(" ;");
+                            }
+
+                        }
+                    } else {
+                        result.append(availability.getPrice()).append(" ₽/шт. ");
+                    }
+                }
+            });
+            result.append("\n");
+        }
+        return result.toString();
     }
 
     private int round25(String number) {

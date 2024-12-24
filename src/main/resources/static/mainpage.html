@@ -25,7 +25,11 @@
             margin-bottom: 20px;
         }
 
-        .filters-fields { display: flex; gap: 10px; flex-wrap: wrap;}
+        .filters-fields {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
 
         .filters-fields input {
             flex: 1;
@@ -101,66 +105,56 @@
             background-color: #f0f0f0;
         }
 
-        /*.dark-mode-button {*/
-        /*    position: absolute;*/
-        /*    top: 10px;*/
-        /*    right: 10px;*/
-        /*    background-color: #333;*/
-        /*    color: #fff;*/
-        /*    padding: 5px 10px;*/
-        /*    border: none;*/
-        /*    border-radius: 5px;*/
-        /*    cursor: pointer;*/
-        /*}*/
-
-        /*.dark-mode-button:hover {*/
-        /*    background-color: #444;*/
-        /*}*/
-
-        /*.dark-mode .container {*/
-        /*    background-color: #444;*/
-        /*    border-color: #333;*/
-        /*}*/
-
-        /*.dark-mode .fetch-button {*/
-        /*    background-color: #666;*/
-        /*}*/
-
-        /*.dark-mode .result-block th {*/
-        /*    background-color: #444;*/
-        /*}*/
-
-        .autocomplete-brands {
-            border: 1px solid #ccc;
-            max-height: 200px;
-            overflow-y: auto;
-            position: absolute;
-            width: 300px;
-            background-color: white;
-            z-index: 10;
-            display: flex;
-            gap: 10px;
-            align-items: baseline;
-            flex-wrap: wrap;
-            margin-top: 5px; /* Немного отступим вниз, чтобы предложения не накладывались на поле ввода */
-        }
-
-        .autocomplete-brand {
+        /* Поле ввода брендов */
+        #brands {
             padding: 8px;
-            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%; /* Растягивается до конца родительского контейнера */
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.3s ease;
+            margin-bottom: 10px; /* Отступ снизу от строки поиска */
         }
 
+        /* Контейнер автозаполнения */
+        .autocomplete-brands {
+            position: absolute;
+            top: 100%; /* Располагается сразу под полем ввода */
+            left: 0; /* Привязан к левому краю родительского контейнера */
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%; /* Совпадает по ширине с полем ввода */
+            max-height: 200px; /* Ограничение по высоте */
+            overflow-y: auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: none; /* Скрыт по умолчанию */
+            box-sizing: border-box; /* Учитывает отступы и границы */
+        }
+
+        /* Стили при наведении */
         .autocomplete-brand:hover {
             background-color: #f0f0f0;
         }
 
-        #brands {
-            position: relative;
+        /* Отображение контейнера, если он не пуст */
+        .autocomplete-brands.visible {
+            display: block;
+        }
+
+        /* Элементы списка */
+        .autocomplete-brand {
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        /* Контейнер фильтров */
+        .brand-class {
             display: flex;
             gap: 10px;
-            align-items: baseline;
-            flex-wrap: wrap;
-            z-index: 100;
+            flex-wrap: wrap; /* Для адаптации в случае недостатка места */
         }
     </style>
 </head>
@@ -174,6 +168,10 @@
             <input type="number" id="width" placeholder="Ширина" min="0">
             <input type="number" id="height" placeholder="Высота" min="0">
             <input type="number" id="diameter" placeholder="Диаметр" min="0">
+        </div>
+        <div class="brand-class" style="position: relative;">
+            <input type="text" id="brands" placeholder="Бренд" autocomplete="on">
+            <div id="brandsContainer" class="autocomplete-brands"></div>
         </div>
         <div class="filter-select">
             <label for="season">Сезон:</label>
@@ -190,10 +188,6 @@
                 <option value="Нешип.">Нешип.</option>
             </select>
         </div>
-
-            <label for="brands">Бренд</label>
-            <input type="text" id="brands" placeholder="Введите бренд..." autocomplete="on">
-            <div id="brandsContainer" class="autocomplete-brands"></div>
 
         <div class="checkbox">
             <label for="runflat">RunFlat</label><input type="checkbox" id="runflat">
@@ -254,63 +248,73 @@
             });
     });
 
-    document.getElementById('brands').addEventListener('input', function() {
-        let query = this.value.trim();
+    document.addEventListener('DOMContentLoaded', function () {
+        const input = document.getElementById('brands');
+        const container = document.getElementById('brandsContainer');
+        let allBrands = []; // Храним все бренды
 
-        if (query.length > 0) {
-            // Отправляем запрос на сервер для получения предложений
-            fetch('/getBrands')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(brands => {
-                    // Фильтруем предложения по введенному запросу
-                    let filteredBrands = brands.filter(s => s.toLowerCase().startsWith(query.toLowerCase()));
+        // Загрузка всех брендов при инициализации
+        fetch('/getBrands')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(brands => {
+                allBrands = brands.sort((a, b) => a.localeCompare(b, 'ru')); // Сортируем по алфавиту
+            })
+            .catch(error => {
+                console.error("Error fetching brands:", error);
+            });
 
-                    // Ограничиваем количество вариантов до 5
-                    filteredBrands = filteredBrands.slice(0, 5);
+        // Событие ввода текста
+        input.addEventListener('input', function () {
+            const query = this.value.trim();
 
-                    // Отображаем предложения
-                    displayBrands(filteredBrands);
-                })
-                .catch(error => {
-                    console.error("Error fetching brands:", error);
+            if (query.length > 0) {
+                // Фильтруем бренды по введенному тексту
+                const filteredBrands = allBrands.filter(brand =>
+                    brand.toLowerCase().startsWith(query.toLowerCase())
+                );
+
+                displayBrands(filteredBrands);
+            } else {
+                displayBrands(allBrands);
+            }
+        });
+
+        // Скрытие автозаполнения при клике вне блока
+        document.addEventListener('click', function (event) {
+            if (!container.contains(event.target) && event.target !== input) {
+                container.classList.remove('visible');
+            }
+        });
+
+        // Функция отображения вариантов
+        function displayBrands(brands) {
+            container.innerHTML = ''; // Очищаем предыдущие предложения
+
+            if (brands.length > 0) {
+                container.classList.add('visible'); // Показываем контейнер
+                brands.forEach(brand => {
+                    const div = document.createElement('div');
+                    div.classList.add('autocomplete-brand');
+                    div.textContent = brand;
+
+                    // Заполнение поля ввода при выборе варианта
+                    div.addEventListener('click', function () {
+                        input.value = brand;
+                        container.innerHTML = '';
+                        container.classList.remove('visible'); // Скрываем контейнер
+                    });
+
+                    container.appendChild(div);
                 });
-        } else {
-            // Если поле пустое, скрываем предложения
-            document.getElementById('brandsContainer').innerHTML = '';
+            } else {
+                container.classList.remove('visible'); // Скрываем контейнер, если пусто
+            }
         }
     });
-
-    function displayBrands(brands) {
-        const container = document.getElementById('brandsContainer');
-        container.innerHTML = ''; // Очищаем предыдущие предложения
-
-        if (brands.length > 0) {
-            // Создаем список предложений
-            brands.forEach(brands => {
-                const div = document.createElement('div');
-                div.classList.add('autocomplete-brand');
-                div.textContent = brands;
-                // Добавляем обработчик клика для каждого предложения
-                div.addEventListener('click', function() {
-                    // Заполняем поле ввода выбранным предложением
-                    document.getElementById('brands').value = brands;
-
-                    // Закрываем список предложений
-                    container.innerHTML = '';
-                });
-                container.appendChild(div);
-            });
-        } else {
-            const div = document.createElement('div');
-            div.classList.add('autocomplete-brand');
-            div.textContent = 'Нет результатов';
-            container.appendChild(div);
-        }
-    }
 </script>
 
