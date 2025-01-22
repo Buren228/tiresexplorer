@@ -259,7 +259,7 @@
 
         if (query.length > 0) {
             // Отправляем запрос на сервер для получения предложений
-            fetch('/getBrands')
+            fetch('/getData?param=brands')
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);

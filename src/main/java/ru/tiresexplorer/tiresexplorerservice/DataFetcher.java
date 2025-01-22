@@ -81,32 +81,54 @@ public class DataFetcher {
             System.out.println("Ничего не выгрузилось, что-то пошло не так");
         }
 
-        updateBrands();
+        updateData("brands.txt");
+        updateData("width.txt");
+        updateData("height.txt");
+        updateData("diameter.txt");
     }
 
-    private void updateBrands() {
+    private void updateData(String txt) {
         Cash cash = Cash.getInstance();
 
         try {
-            File brands = new File("src/main/resources/static/brands.txt");
+            File data = new File("src/main/resources/static/" + txt);
 
-            Set<String> uniqueBrands = new HashSet<>();
+            Set<String> uniqueData = new HashSet<>();
 
-            for (Assortment assortment : cash.getAssortment()) {
-                uniqueBrands.add(assortment.getP_brand());
+            switch (txt) {
+                case "brands.txt":
+                    for (Assortment assortment : cash.getAssortment()) {
+                        uniqueData.add(assortment.getP_brand());
+                    }
+                    break;
+                case "width.txt":
+                    for (Assortment assortment : cash.getAssortment()) {
+                        uniqueData.add(assortment.getP_width());
+                    }
+                    break;
+                case "height.txt":
+                    for (Assortment assortment : cash.getAssortment()) {
+                        uniqueData.add(assortment.getP_height());
+                    }
+                    break;
+                case "diameter.txt":
+                    for (Assortment assortment : cash.getAssortment()) {
+                        uniqueData.add(assortment.getP_diameter());
+                    }
+                    break;
+
             }
 
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(brands, false))) {
-                for (String brand : uniqueBrands) {
-                    writer.write(brand);
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(data, false))) {
+                for (String unique : uniqueData) {
+                    writer.write(unique);
                     writer.newLine();
                 }
             }
 
         } catch (IOException e) {
-            System.out.println("Файл с брендами не найден или его не существует");
+            System.out.printf("Файл %s с брендами не найден или его не существует", txt);
         }
-
     }
 
     private List<Assortment> performAssortment(String response) {

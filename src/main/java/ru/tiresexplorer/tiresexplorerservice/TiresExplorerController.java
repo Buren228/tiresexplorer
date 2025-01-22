@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,19 +35,35 @@ public class TiresExplorerController {
         return  dataFetcher.performData(filter);
     }
 
-    @GetMapping("/getBrands")
-    public List<String> getSearchSuggestions() throws IOException {
-        File file = new File("src/main/resources/static/brands.txt");
+//    @GetMapping("/getBrands")
+//    public List<String> getSearchSuggestions() throws IOException {
+//        File file = new File("src/main/resources/static/brands.txt");
+//
+//        List<String> brands = new ArrayList<>();
+//
+//        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+//            String line;
+//            while ((line = reader.readLine()) != null) {
+//                brands.add(line);
+//            }
+//        }
+//
+//        return brands;
+//    }
 
-        List<String> brands = new ArrayList<>();
+    @GetMapping("/getData")
+    public List<String> getSearchSuggestions(@PathVariable(name = "param") String param) throws IOException {
+        File file = new File("src/main/resources/static/"+ param +".txt");
+
+        List<String> data = new ArrayList<>();
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                brands.add(line);
+                data.add(line);
             }
         }
 
-        return brands;
+        return data;
     }
 }
