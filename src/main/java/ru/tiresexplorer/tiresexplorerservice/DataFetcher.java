@@ -81,39 +81,39 @@ public class DataFetcher {
             System.out.println("Ничего не выгрузилось, что-то пошло не так");
         }
 
-        updateData("brands.txt");
-        updateData("width.txt");
-        updateData("height.txt");
-        updateData("diameter.txt");
+        updateData("brands");
+        updateData("width");
+        updateData("height");
+        updateData("diameter");
     }
 
     private void updateData(String txt) {
         Cash cash = Cash.getInstance();
 
         try {
-            File data = new File("src/main/resources/static/" + txt);
+            File data = new File("src/main/resources/static/" + txt  + ".txt");
 
             Set<String> uniqueData = new HashSet<>();
 
             switch (txt) {
-                case "brands.txt":
+                case "brands":
                     for (Assortment assortment : cash.getAssortment()) {
                         uniqueData.add(assortment.getP_brand());
                     }
                     break;
-                case "width.txt":
+                case "width":
                     for (Assortment assortment : cash.getAssortment()) {
-                        uniqueData.add(assortment.getP_width());
+                        uniqueData.add(assortment.getP_width().substring(0, assortment.getP_width().indexOf(".")));
                     }
                     break;
-                case "height.txt":
+                case "height":
                     for (Assortment assortment : cash.getAssortment()) {
-                        uniqueData.add(assortment.getP_height());
+                        uniqueData.add(assortment.getP_height().substring(0, assortment.getP_height().indexOf(".")));
                     }
                     break;
-                case "diameter.txt":
+                case "diameter":
                     for (Assortment assortment : cash.getAssortment()) {
-                        uniqueData.add(assortment.getP_diameter());
+                        uniqueData.add(assortment.getP_diameter().substring(0, assortment.getP_diameter().indexOf(".")));
                     }
                     break;
 

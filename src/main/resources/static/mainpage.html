@@ -156,6 +156,13 @@
             gap: 10px;
             flex-wrap: wrap; /* Для адаптации в случае недостатка места */
         }
+        .whd-class {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+            z-index: 999;
+            flex-wrap: wrap;  /* Для адаптации в случае недостатка места */
+        }
     </style>
 </head>
 
@@ -165,9 +172,15 @@
     <h1 align="center">Tires Explorer App</h1>
     <div class="filter-block">
         <div class="filters-fields">
-            <input type="number" id="width" placeholder="Ширина" min="0">
-            <input type="number" id="height" placeholder="Высота" min="0">
-            <input type="number" id="diameter" placeholder="Диаметр" min="0">
+            <div class="whd-class" style="position: relative;">
+            <input type="number" id="width" placeholder="Ширина" min="0" autocomplete="on">
+                <div id="widthContainer" class="autocomplete-brands"></div></div>
+            <div class="whd-class" style="position: relative;">
+            <input type="number" id="heights" placeholder="Высота" min="0" autocomplete="on">
+                <div id="heightContainer" class="autocomplete-brands"></div></div>
+            <div class="whd-class" style="position: relative;">
+            <input type="number" id="diameters" placeholder="Диаметр" min="0" autocomplete="on">
+                <div id="diameterContainer" class="autocomplete-brands"></div></div>
         </div>
         <div class="brand-class" style="position: relative;">
             <input type="text" id="brands" placeholder="Бренд" autocomplete="on">
@@ -209,8 +222,8 @@
 <script>
     document.getElementById('searchButton').addEventListener('click', function () {
         const width = document.getElementById('width').value;
-        const height = document.getElementById('height').value;
-        const diameter = document.getElementById('diameter').value;
+        const height = document.getElementById('heights').value;
+        const diameter = document.getElementById('diameters').value;
         const season = document.getElementById('season').value;
         const spikes = document.getElementById('spikes').value;
         const runflat = document.getElementById('runflat').checked;
@@ -254,7 +267,7 @@
         let allBrands = []; // Храним все бренды
 
         // Загрузка всех брендов при инициализации
-        fetch('/getBrands')
+        fetch('/getData?param=brands')
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -284,6 +297,14 @@
             }
         });
 
+        // Событие клика на поле ввода
+        input.addEventListener('click', function () {
+            // Если поле пустое, отображаем все бренды
+            if (this.value.trim().length === 0) {
+                displayBrands(allBrands);
+            }
+        });
+
         // Скрытие автозаполнения при клике вне блока
         document.addEventListener('click', function (event) {
             if (!container.contains(event.target) && event.target !== input) {
@@ -305,6 +326,237 @@
                     // Заполнение поля ввода при выборе варианта
                     div.addEventListener('click', function () {
                         input.value = brand;
+                        container.innerHTML = '';
+                        container.classList.remove('visible'); // Скрываем контейнер
+                    });
+
+                    container.appendChild(div);
+                });
+            } else {
+                container.classList.remove('visible'); // Скрываем контейнер, если пусто
+            }
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const input = document.getElementById('width');
+        const container = document.getElementById('widthContainer');
+        let allWidths = []; // Храним все бренды
+
+        // Загрузка всех брендов при инициализации
+        fetch('/getData?param=width')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(widths => {
+                allWidths = widths.sort((a, b) => parseFloat(a) - parseFloat(b)); // Сортируем по алфавиту
+            })
+            .catch(error => {
+                console.error("Error fetching widths:", error);
+            });
+
+        // Событие ввода текста
+        input.addEventListener('input', function () {
+            const query = this.value.trim();
+
+            if (query.length > 0) {
+                // Фильтруем бренды по введенному тексту
+                const filteredWidths = allWidths.filter(width =>
+                    width.toLowerCase().startsWith(query.toLowerCase())
+                );
+
+                displayWidths(filteredWidths);
+            } else {
+                displayWidths(allWidths);
+            }
+        });
+
+        // Событие клика на поле ввода
+        input.addEventListener('click', function () {
+            // Если поле пустое, отображаем все бренды
+            if (this.value.trim().length === 0) {
+                displayWidths(allWidths);
+            }
+        });
+
+        // Скрытие автозаполнения при клике вне блока
+        document.addEventListener('click', function (event) {
+            if (!container.contains(event.target) && event.target !== input) {
+                container.classList.remove('visible');
+            }
+        });
+
+        // Функция отображения вариантов
+        function displayWidths(widths) {
+            container.innerHTML = ''; // Очищаем предыдущие предложения
+
+            if (widths.length > 0) {
+                container.classList.add('visible'); // Показываем контейнер
+                widths.forEach(width => {
+                    const div = document.createElement('div');
+                    div.classList.add('autocomplete-brand');
+                    div.textContent = width;
+
+                    // Заполнение поля ввода при выборе варианта
+                    div.addEventListener('click', function () {
+                        input.value = width;
+                        container.innerHTML = '';
+                        container.classList.remove('visible'); // Скрываем контейнер
+                    });
+
+                    container.appendChild(div);
+                });
+            } else {
+                container.classList.remove('visible'); // Скрываем контейнер, если пусто
+            }
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const input = document.getElementById('heights');
+        const container = document.getElementById('heightContainer');
+        let allHeights = []; // Храним все бренды
+
+        // Загрузка всех брендов при инициализации
+        fetch('/getData?param=height')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(heights => {
+                allHeights = heights.sort((a, b) => parseFloat(a) - parseFloat(b)); // Сортируем по алфавиту
+            })
+            .catch(error => {
+                console.error("Error fetching heights:", error);
+            });
+
+        // Событие ввода текста
+        input.addEventListener('input', function () {
+            const query = this.value.trim();
+
+            if (query.length > 0) {
+                // Фильтруем бренды по введенному тексту
+                const filteredHeights = allHeights.filter(height =>
+                    height.toLowerCase().startsWith(query.toLowerCase())
+                );
+
+                displayHeights(filteredHeights);
+            } else {
+                displayHeights(allHeights);
+            }
+        });
+
+        // Событие клика на поле ввода
+        input.addEventListener('click', function () {
+            // Если поле пустое, отображаем все бренды
+            if (this.value.trim().length === 0) {
+                displayHeights(allHeights);
+            }
+        });
+
+        // Скрытие автозаполнения при клике вне блока
+        document.addEventListener('click', function (event) {
+            if (!container.contains(event.target) && event.target !== input) {
+                container.classList.remove('visible');
+            }
+        });
+
+        // Функция отображения вариантов
+        function displayHeights(heights) {
+            container.innerHTML = ''; // Очищаем предыдущие предложения
+
+            if (heights.length > 0) {
+                container.classList.add('visible'); // Показываем контейнер
+                heights.forEach(height => {
+                    const div = document.createElement('div');
+                    div.classList.add('autocomplete-brand');
+                    div.textContent = height;
+
+                    // Заполнение поля ввода при выборе варианта
+                    div.addEventListener('click', function () {
+                        input.value = height;
+                        container.innerHTML = '';
+                        container.classList.remove('visible'); // Скрываем контейнер
+                    });
+
+                    container.appendChild(div);
+                });
+            } else {
+                container.classList.remove('visible'); // Скрываем контейнер, если пусто
+            }
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const input = document.getElementById('diameters');
+        const container = document.getElementById('diameterContainer');
+        let allDiameters = []; // Храним все бренды
+
+        // Загрузка всех брендов при инициализации
+        fetch('/getData?param=diameter')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(diameters => {
+                allDiameters = diameters.sort((a, b) => parseFloat(a) - parseFloat(b)); // Сортируем по алфавиту
+            })
+            .catch(error => {
+                console.error("Error fetching diameters:", error);
+            });
+
+        // Событие ввода текста
+        input.addEventListener('input', function () {
+            const query = this.value.trim();
+
+            if (query.length > 0) {
+                // Фильтруем бренды по введенному тексту
+                const filteredDiameters = allDiameters.filter(diameter =>
+                    diameter.toLowerCase().startsWith(query.toLowerCase())
+                );
+
+                displayDiameters(filteredDiameters);
+            } else {
+                displayDiameters(allDiameters);
+            }
+        });
+
+        // Событие клика на поле ввода
+        input.addEventListener('click', function () {
+            // Если поле пустое, отображаем все бренды
+            if (this.value.trim().length === 0) {
+                displayDiameters(allDiameters);
+            }
+        });
+
+        // Скрытие автозаполнения при клике вне блока
+        document.addEventListener('click', function (event) {
+            if (!container.contains(event.target) && event.target !== input) {
+                container.classList.remove('visible');
+            }
+        });
+
+        // Функция отображения вариантов
+        function displayDiameters(diameters) {
+            container.innerHTML = ''; // Очищаем предыдущие предложения
+
+            if (diameters.length > 0) {
+                container.classList.add('visible'); // Показываем контейнер
+                diameters.forEach(diameter => {
+                    const div = document.createElement('div');
+                    div.classList.add('autocomplete-brand');
+                    div.textContent = diameter;
+
+                    // Заполнение поля ввода при выборе варианта
+                    div.addEventListener('click', function () {
+                        input.value = diameter;
                         container.innerHTML = '';
                         container.classList.remove('visible'); // Скрываем контейнер
                     });
