@@ -99,23 +99,23 @@ public class DataFetcher {
             switch (txt) {
                 case "brands":
                     for (Assortment assortment : cash.getAssortment()) {
-                        uniqueData.add(assortment.getP_brand());
+                        uniqueData.add(assortment.getBrand());
                     }
                     break;
                 case "width":
                     for (Assortment assortment : cash.getAssortment()) {
-                        uniqueData.add(toIntFormat(assortment.getP_width()));
+                        uniqueData.add(toIntFormat(assortment.getWidth()));
 //                        uniqueData.add(assortment.getP_width());
                     }
                     break;
                 case "height":
                     for (Assortment assortment : cash.getAssortment()) {
-                        uniqueData.add(toIntFormat(assortment.getP_height()));
+                        uniqueData.add(toIntFormat(assortment.getHeight()));
                     }
                     break;
                 case "diameter":
                     for (Assortment assortment : cash.getAssortment()) {
-                        uniqueData.add(toIntFormat(assortment.getP_diameter()));
+                        uniqueData.add(toIntFormat(assortment.getDiameter()));
                     }
                     break;
 
@@ -168,33 +168,33 @@ public class DataFetcher {
 
         List<Assortment> assortments = new ArrayList<>(cash.getAssortment());
 
-        assortments.removeIf(x -> x.getP_runflat() != filter.isRunflat() ||
-                x.getP_cargo() != filter.isLightweight() ||
-                x.getP_mud_terrain() != filter.isMt() ||
-                x.getP_all_terrain() != filter.isAt()
+        assortments.removeIf(x -> x.getRunflat() != filter.isRunflat() ||
+                x.getCargo() != filter.isLightweight() ||
+                x.getMudTerrain() != filter.isMt() ||
+                x.getAllTerrain() != filter.isAt()
         );
         if (filter.getWidth() != null) {
-            assortments.removeIf(x -> !toIntFormat(x.getP_width()).equals(filter.getWidth().toString()));
+            assortments.removeIf(x -> !toIntFormat(x.getWidth()).equals(filter.getWidth().toString()));
         }
         if (filter.getHeight() != null) {
-            assortments.removeIf(x -> !toIntFormat(x.getP_height()).equals(filter.getHeight().toString()));
+            assortments.removeIf(x -> !toIntFormat(x.getHeight()).equals(filter.getHeight().toString()));
         }
         if (filter.getDiameter() != null) {
-            assortments.removeIf(x -> !toIntFormat(x.getP_diameter()).equals(filter.getDiameter().toString()));
+            assortments.removeIf(x -> !toIntFormat(x.getDiameter()).equals(filter.getDiameter().toString()));
         }
         if (!filter.getSeason().equals("")) {
-            assortments.removeIf(x -> !x.getP_season().equals(filter.getSeason()));
+            assortments.removeIf(x -> !x.getSeason().equals(filter.getSeason()));
         }
         if (!filter.getBrand().equals("")) {
-            assortments.removeIf(x -> !x.getP_brand().equals(filter.getBrand()));
+            assortments.removeIf(x -> !x.getBrand().equals(filter.getBrand()));
         }
 
         switch (filter.getSpikes()) {
             case "Шип.":
-                assortments.removeIf(x -> !x.getP_thorn());
+                assortments.removeIf(x -> !x.getThorn());
                 break;
             case "Нешип.":
-                assortments.removeIf(Assortment::getP_thorn);
+                assortments.removeIf(Assortment::getThorn);
                 break;
         }
         if (assortments.size() > 0) {
@@ -222,7 +222,7 @@ public class DataFetcher {
 
                 assortments.forEach(x -> {
                     if (x.getCode().equals(availability.getCode())) {
-                        result.append(x.getP_full_name()).append(" - ");
+                        result.append(x.getFullName()).append(" - ");
                         if (availability.getPrice().split(",").length > 1) {
                             for (int i = 0; i < availability.getPrice().split(",").length; i++) {
                                 String[] prices = availability.getPrice().split(",");
