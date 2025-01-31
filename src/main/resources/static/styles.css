@@ -1,0 +1,157 @@
+body {
+    font-family: 'Open Sans', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.filter-block {
+    margin-bottom: 20px;
+}
+
+.filters-fields {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.filters-fields input {
+    flex: 1;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    align-items: baseline;
+    min-width: 120px;
+}
+
+.filter-select {
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+}
+
+.filter-select select {
+    flex: 1;
+}
+
+.filter-block label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.filter-block select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+}
+
+.filter-block input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+.fetch-button {
+    background-color: #4CAF50;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.checkbox {
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+    flex-wrap: wrap;
+}
+
+.fetch-button:hover {
+    background-color: #3e8e41;
+}
+
+.result-block {
+    margin-top: 20px;
+}
+
+.result-block table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.result-block th, .result-block td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+.result-block th {
+    background-color: #f0f0f0;
+}
+
+/* Поле ввода брендов */
+#brands {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 100%; /* Растягивается до конца родительского контейнера */
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.3s ease;
+    margin-bottom: 10px; /* Отступ снизу от строки поиска */
+}
+
+/* Контейнер автозаполнения */
+.autocomplete-brands {
+    position: absolute;
+    top: 100%; /* Располагается сразу под полем ввода */
+    left: 0; /* Привязан к левому краю родительского контейнера */
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 100%; /* Совпадает по ширине с полем ввода */
+    max-height: 200px; /* Ограничение по высоте */
+    overflow-y: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: none; /* Скрыт по умолчанию */
+    box-sizing: border-box; /* Учитывает отступы и границы */
+    z-index: 10;
+}
+
+/* Стили при наведении */
+.autocomplete-brand:hover {
+    background-color: #f0f0f0;
+}
+
+/* Отображение контейнера, если он не пуст */
+.autocomplete-brands.visible {
+    display: block;
+}
+
+/* Элементы списка */
+.autocomplete-brand {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+/* Контейнер фильтров */
+.brand-class {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap; /* Для адаптации в случае недостатка места */
+}
+.whd-class {
+    display: flex;
+    gap: 10px;
+    flex: 1;
+    flex-wrap: wrap;  /* Для адаптации в случае недостатка места */
+}

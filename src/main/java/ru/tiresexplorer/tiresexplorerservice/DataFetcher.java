@@ -1,6 +1,7 @@
 package ru.tiresexplorer.tiresexplorerservice;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -103,17 +104,18 @@ public class DataFetcher {
                     break;
                 case "width":
                     for (Assortment assortment : cash.getAssortment()) {
-                        uniqueData.add(assortment.getP_width().substring(0, assortment.getP_width().indexOf(".")));
+                        uniqueData.add(toIntFormat(assortment.getP_width()));
+//                        uniqueData.add(assortment.getP_width());
                     }
                     break;
                 case "height":
                     for (Assortment assortment : cash.getAssortment()) {
-                        uniqueData.add(assortment.getP_height().substring(0, assortment.getP_height().indexOf(".")));
+                        uniqueData.add(toIntFormat(assortment.getP_height()));
                     }
                     break;
                 case "diameter":
                     for (Assortment assortment : cash.getAssortment()) {
-                        uniqueData.add(assortment.getP_diameter().substring(0, assortment.getP_diameter().indexOf(".")));
+                        uniqueData.add(toIntFormat(assortment.getP_diameter()));
                     }
                     break;
 
@@ -129,6 +131,10 @@ public class DataFetcher {
         } catch (IOException e) {
             System.out.printf("Файл %s с брендами не найден или его не существует", txt);
         }
+    }
+
+    private String toIntFormat(String str) {
+        return str.substring(0, str.indexOf("."));
     }
 
     private List<Assortment> performAssortment(String response) {
@@ -168,13 +174,13 @@ public class DataFetcher {
                 x.getP_all_terrain() != filter.isAt()
         );
         if (filter.getWidth() != null) {
-            assortments.removeIf(x -> !x.getP_width().equals(filter.getWidth() + ".00"));
+            assortments.removeIf(x -> !toIntFormat(x.getP_width()).equals(filter.getWidth().toString()));
         }
         if (filter.getHeight() != null) {
-            assortments.removeIf(x -> !x.getP_height().equals(filter.getHeight() + ".00"));
+            assortments.removeIf(x -> !toIntFormat(x.getP_height()).equals(filter.getHeight().toString()));
         }
         if (filter.getDiameter() != null) {
-            assortments.removeIf(x -> !x.getP_diameter().equals(filter.getDiameter() + ".00"));
+            assortments.removeIf(x -> !toIntFormat(x.getP_diameter()).equals(filter.getDiameter().toString()));
         }
         if (!filter.getSeason().equals("")) {
             assortments.removeIf(x -> !x.getP_season().equals(filter.getSeason()));
