@@ -1,30 +1,54 @@
 package ru.tiresexplorer.tiresexplorerservice.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public
 class Assortment {
+    @JsonProperty("code")
     private String code;
-    private String p_full_name;
-    private String p_brand;
-//    private String p_model;
-    private String p_width;
-    private String p_height;
-    private String p_diameter;
-    //    private String p_load_index;
-//    private String p_speed_index;
-    private String p_season;
-    private String p_category;
-    //    private String p_xl;
-    private Boolean p_mud_terrain;
-    private Boolean p_all_terrain;
-    private Boolean p_cargo;
-    private Boolean p_thorn;
-    private Boolean p_can_thorn;
-    private Boolean p_runflat;
+
+    @JsonProperty("p_full_name")
+    private String fullName;
+
+    @JsonProperty("p_brand")
+    private String brand;
+
+    @JsonProperty("p_width")
+    private String width;
+
+    @JsonProperty("p_height")
+    private String height;
+
+    @JsonProperty("p_diameter")
+    private String diameter;
+
+    @JsonProperty("p_season")
+    private String season;
+
+    @JsonProperty("p_category")
+    private String category;
+
+    @JsonProperty("p_mud_terrain")
+    private Boolean mudTerrain;
+
+    @JsonProperty("p_all_terrain")
+    private Boolean allTerrain;
+
+    @JsonProperty("p_cargo")
+    private Boolean cargo;
+
+    @JsonProperty("p_thorn")
+    private Boolean thorn;
+
+    @JsonProperty("p_can_thorn")
+    private Boolean canThorn;
+
+    @JsonProperty("p_runflat")
+    private Boolean runflat;
 //    private String p_protection;
 //    private String  p_omologation;
 //    private String p_side;
