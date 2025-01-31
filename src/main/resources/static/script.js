@@ -40,333 +40,84 @@ document.getElementById('searchButton').addEventListener('click', function () {
 });
 
 document.addEventListener('DOMContentLoaded', function () {
-    const input = document.getElementById('brands');
-    const container = document.getElementById('brandsContainer');
-    let allBrands = []; // Храним все бренды
+    setupAutocomplete('brands', 'brandsContainer', 'brands', true);
+    setupAutocomplete('width', 'widthContainer', 'width', false);
+    setupAutocomplete('heights', 'heightContainer', 'height', false);
+    setupAutocomplete('diameters', 'diameterContainer', 'diameter', false);
 
-    // Загрузка всех брендов при инициализации
-    fetch('/getData', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: 'brands'
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+    function setupAutocomplete(inputId, containerId, requestType, isTextType) {
+        const input = document.getElementById(inputId);
+        const container = document.getElementById(containerId);
+        let allValues = [];
+        let isDataLoaded = false;
+
+        // Функция для выполнения запроса
+        function fetchData() {
+            fetch('/getData', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: requestType
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return response.json();
+                })
+                .then(values => {
+                    allValues = isTextType
+                        ? values.sort((a, b) => a.localeCompare(b, 'ru'))
+                        : values.sort((a, b) => parseFloat(a) - parseFloat(b));
+
+                    isDataLoaded = true;
+                    displayValues(allValues);
+                })
+                .catch(error => console.error(`Ошибка загрузки ${requestType}:`, error));
+        }
+
+        // Запрашиваем данные при клике и раз в 30 минут
+        input.addEventListener('click', function () {
+            if (!isDataLoaded) {
+                fetchData();
+            } else {
+                displayValues(allValues);
             }
-            return response.json();
-        })
-        .then(brands => {
-            allBrands = brands.sort((a, b) => a.localeCompare(b, 'ru')); // Сортируем по алфавиту
-        })
-        .catch(error => {
-            console.error("Error fetching brands:", error);
         });
 
-    // Событие ввода текста
-    input.addEventListener('input', function () {
-        const query = this.value.trim();
-
-        if (query.length > 0) {
-            // Фильтруем бренды по введенному тексту
-            const filteredBrands = allBrands.filter(brand =>
-                brand.toLowerCase().startsWith(query.toLowerCase())
-            );
-
-            displayBrands(filteredBrands);
-        } else {
-            displayBrands(allBrands);
-        }
-    });
-
-    // Событие клика на поле ввода
-    input.addEventListener('click', function () {
-        // Если поле пустое, отображаем все бренды
-        if (this.value.trim().length === 0) {
-            displayBrands(allBrands);
-        }
-    });
-
-    // Скрытие автозаполнения при клике вне блока
-    document.addEventListener('click', function (event) {
-        if (!container.contains(event.target) && event.target !== input) {
-            container.classList.remove('visible');
-        }
-    });
-
-    // Функция отображения вариантов
-    function displayBrands(brands) {
-        container.innerHTML = ''; // Очищаем предыдущие предложения
-
-        if (brands.length > 0) {
-            container.classList.add('visible'); // Показываем контейнер
-            brands.forEach(brand => {
-                const div = document.createElement('div');
-                div.classList.add('autocomplete-brand');
-                div.textContent = brand;
-
-                // Заполнение поля ввода при выборе варианта
-                div.addEventListener('click', function () {
-                    input.value = brand;
-                    container.innerHTML = '';
-                    container.classList.remove('visible'); // Скрываем контейнер
-                });
-
-                container.appendChild(div);
-            });
-        } else {
-            container.classList.remove('visible'); // Скрываем контейнер, если пусто
-        }
-    }
-});
-
-document.addEventListener('DOMContentLoaded', function () {
-    const input = document.getElementById('width');
-    const container = document.getElementById('widthContainer');
-    let allWidths = []; // Храним все бренды
-
-    // Загрузка всех брендов при инициализации
-    fetch('/getData', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: 'width'
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(widths => {
-            allWidths = widths.sort((a, b) => parseFloat(a) - parseFloat(b)); // Сортируем по алфавиту
-        })
-        .catch(error => {
-            console.error("Error fetching widths:", error);
+        input.addEventListener('input', function () {
+            const query = this.value.trim().toLowerCase();
+            displayValues(query.length > 0
+                ? allValues.filter(val => val.toLowerCase().startsWith(query))
+                : allValues);
         });
 
-    // Событие ввода текста
-    input.addEventListener('input', function () {
-        const query = this.value.trim();
-
-        if (query.length > 0) {
-            // Фильтруем бренды по введенному тексту
-            const filteredWidths = allWidths.filter(width =>
-                width.toLowerCase().startsWith(query.toLowerCase())
-            );
-
-            displayWidths(filteredWidths);
-        } else {
-            displayWidths(allWidths);
-        }
-    });
-
-    // Событие клика на поле ввода
-    input.addEventListener('click', function () {
-        // Если поле пустое, отображаем все бренды
-        if (this.value.trim().length === 0) {
-            displayWidths(allWidths);
-        }
-    });
-
-    // Скрытие автозаполнения при клике вне блока
-    document.addEventListener('click', function (event) {
-        if (!container.contains(event.target) && event.target !== input) {
-            container.classList.remove('visible');
-        }
-    });
-
-    // Функция отображения вариантов
-    function displayWidths(widths) {
-        container.innerHTML = ''; // Очищаем предыдущие предложения
-
-        if (widths.length > 0) {
-            container.classList.add('visible'); // Показываем контейнер
-            widths.forEach(width => {
-                const div = document.createElement('div');
-                div.classList.add('autocomplete-brand');
-                div.textContent = width;
-
-                // Заполнение поля ввода при выборе варианта
-                div.addEventListener('click', function () {
-                    input.value = width;
-                    container.innerHTML = '';
-                    container.classList.remove('visible'); // Скрываем контейнер
-                });
-
-                container.appendChild(div);
-            });
-        } else {
-            container.classList.remove('visible'); // Скрываем контейнер, если пусто
-        }
-    }
-});
-
-document.addEventListener('DOMContentLoaded', function () {
-    const input = document.getElementById('heights');
-    const container = document.getElementById('heightContainer');
-    let allHeights = []; // Храним все бренды
-
-    // Загрузка всех брендов при инициализации
-    fetch('/getData', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: 'height'
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+        // Скрытие автозаполнения при клике вне блока
+        document.addEventListener('click', function (event) {
+            if (!container.contains(event.target) && event.target !== input) {
+                container.classList.remove('visible');
             }
-            return response.json();
-        })
-        .then(heights => {
-            allHeights = heights.sort((a, b) => parseFloat(a) - parseFloat(b)); // Сортируем по алфавиту
-        })
-        .catch(error => {
-            console.error("Error fetching heights:", error);
         });
 
-    // Событие ввода текста
-    input.addEventListener('input', function () {
-        const query = this.value.trim();
-
-        if (query.length > 0) {
-            // Фильтруем бренды по введенному тексту
-            const filteredHeights = allHeights.filter(height =>
-                height.toLowerCase().startsWith(query.toLowerCase())
-            );
-
-            displayHeights(filteredHeights);
-        } else {
-            displayHeights(allHeights);
-        }
-    });
-
-    // Событие клика на поле ввода
-    input.addEventListener('click', function () {
-        // Если поле пустое, отображаем все бренды
-        if (this.value.trim().length === 0) {
-            displayHeights(allHeights);
-        }
-    });
-
-    // Скрытие автозаполнения при клике вне блока
-    document.addEventListener('click', function (event) {
-        if (!container.contains(event.target) && event.target !== input) {
-            container.classList.remove('visible');
-        }
-    });
-
-    // Функция отображения вариантов
-    function displayHeights(heights) {
-        container.innerHTML = ''; // Очищаем предыдущие предложения
-
-        if (heights.length > 0) {
-            container.classList.add('visible'); // Показываем контейнер
-            heights.forEach(height => {
-                const div = document.createElement('div');
-                div.classList.add('autocomplete-brand');
-                div.textContent = height;
-
-                // Заполнение поля ввода при выборе варианта
-                div.addEventListener('click', function () {
-                    input.value = height;
-                    container.innerHTML = '';
-                    container.classList.remove('visible'); // Скрываем контейнер
+        // Функция для отображения значений
+        function displayValues(values) {
+            container.innerHTML = '';
+            if (values.length > 0) {
+                container.classList.add('visible');
+                values.forEach(value => {
+                    const div = document.createElement('div');
+                    div.classList.add('autocomplete-brand');
+                    div.textContent = value;
+                    div.addEventListener('click', function () {
+                        input.value = value;
+                        container.innerHTML = '';
+                        container.classList.remove('visible');
+                    });
+                    container.appendChild(div);
                 });
-
-                container.appendChild(div);
-            });
-        } else {
-            container.classList.remove('visible'); // Скрываем контейнер, если пусто
-        }
-    }
-});
-
-document.addEventListener('DOMContentLoaded', function () {
-    const input = document.getElementById('diameters');
-    const container = document.getElementById('diameterContainer');
-    let allDiameters = []; // Храним все бренды
-
-    // Загрузка всех брендов при инициализации
-    fetch('/getData', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: 'diameter'
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            } else {
+                container.classList.remove('visible');
             }
-            return response.json();
-        })
-        .then(diameters => {
-            allDiameters = diameters.sort((a, b) => parseFloat(a) - parseFloat(b)); // Сортируем по алфавиту
-        })
-        .catch(error => {
-            console.error("Error fetching diameters:", error);
-        });
-
-    // Событие ввода текста
-    input.addEventListener('input', function () {
-        const query = this.value.trim();
-
-        if (query.length > 0) {
-            // Фильтруем бренды по введенному тексту
-            const filteredDiameters = allDiameters.filter(diameter =>
-                diameter.toLowerCase().startsWith(query.toLowerCase())
-            );
-
-            displayDiameters(filteredDiameters);
-        } else {
-            displayDiameters(allDiameters);
         }
-    });
 
-    // Событие клика на поле ввода
-    input.addEventListener('click', function () {
-        // Если поле пустое, отображаем все бренды
-        if (this.value.trim().length === 0) {
-            displayDiameters(allDiameters);
-        }
-    });
-
-    // Скрытие автозаполнения при клике вне блока
-    document.addEventListener('click', function (event) {
-        if (!container.contains(event.target) && event.target !== input) {
-            container.classList.remove('visible');
-        }
-    });
-
-    // Функция отображения вариантов
-    function displayDiameters(diameters) {
-        container.innerHTML = ''; // Очищаем предыдущие предложения
-
-        if (diameters.length > 0) {
-            container.classList.add('visible'); // Показываем контейнер
-            diameters.forEach(diameter => {
-                const div = document.createElement('div');
-                div.classList.add('autocomplete-brand');
-                div.textContent = diameter;
-
-                // Заполнение поля ввода при выборе варианта
-                div.addEventListener('click', function () {
-                    input.value = diameter;
-                    container.innerHTML = '';
-                    container.classList.remove('visible'); // Скрываем контейнер
-                });
-
-                container.appendChild(div);
-            });
-        } else {
-            container.classList.remove('visible'); // Скрываем контейнер, если пусто
-        }
+        // Перезапрос данных каждые 30 минут (1800000 миллисекунд)
+        setInterval(fetchData, 1800000);
     }
 });
