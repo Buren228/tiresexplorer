@@ -54,8 +54,8 @@ public class TiresExplorerController {
 //        return brands;
 //    }
 
-    @GetMapping("/getData")
-    public List<String> getSearchSuggestions(@RequestParam(name = "param") String param) {
+    @PostMapping("/getData")
+    public List<String> getSearchSuggestions(@RequestBody String param) {
         List<String> data = new ArrayList<>();
 
         try {
